@@ -1,51 +1,59 @@
 import axios from "axios";
 import { useState } from "react";
 import "./CSS/emailform.css";
+import { useRef } from "react";
+import emailjs from "@emailjs/browser";
 
 export function EmailForm() {
+  const form = useRef();
   const [errors, setErrors] = useState([]);
   const [errorShow, setErrorShow] = useState(true);
   const [successMessageShow, setSuccessMessageShow] = useState(true);
   const [successMessage, setSuccessMessage] = useState([]);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const params = new FormData(event.target);
+  const sendEmail = (e) => {
+    e.preventDefault();
+    const params = new FormData(e.target);
     setErrors([]);
-    axios
-      .post("https://gtsemailbackend.fly.dev/contact_form", params)
-      .then((response) => {
-        console.log(response.data);
-        event.target.reset();
-        setSuccessMessage(["E-mail sent successfully!"]);
-        setSuccessMessageShow(false);
-        setErrorShow(true);
-        setErrors([]);
+
+    emailjs
+      .sendForm("service_8n7cbdl", "template_m40n1lg", form.current, {
+        publicKey: "yllTUPIWKi2ZgJtsa",
       })
-      .catch((errors) => {
-        console.log(errors.response);
-        setSuccessMessage([]);
-        setErrorShow(false);
-        setSuccessMessageShow(true);
-        setErrors(["Please fill out all fields"]);
-      });
+      .then(
+        () => {
+          console.log("SUCCESS!");
+          e.target.reset();
+          setSuccessMessage(["E-mail sent successfully!"]);
+          setSuccessMessageShow(false);
+          setErrorShow(true);
+          setErrors([]);
+        },
+        (error) => {
+          console.log("FAILED...", error.text);
+          setSuccessMessage([]);
+          setErrorShow(false);
+          setSuccessMessageShow(true);
+          setErrors(["Error, please try again."]);
+        }
+      );
   };
 
   return (
     <div id="login">
-      <form onSubmit={handleSubmit}>
+      <form ref={form} onSubmit={sendEmail}>
         <div className="container">
           <div className="row">
             <div className="email-outsides">
               <h2 className="headertitle">
-                Are You Ready To Grow Your Business? <span className="connector">Let's Connect!</span>
+                Ready To Get Started? <span className="connector">Reach Out!</span>
               </h2>
             </div>
           </div>
           <div className="break2"> </div>
           <div className="row">
             <div>
-              <input name="email" className="form-control" type="email" placeholder="E-mail" />
+              <input name="email" className="form-control" type="user_email" placeholder="E-mail" />
             </div>
           </div>
           <div className="row">
